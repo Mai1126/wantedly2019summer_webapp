@@ -26,9 +26,19 @@ $ curl -XGET -H 'Content-Type:application/json' https://sleepy-cliffs-75300.hero
 ```
 
 ## 課題3
-以下を実行
+以下を実行する。
 ```
 $ cd kadai3
 $ docker-compose build
 $ docker-compose up
+```
+### 課題1
+
+リクエスト
+```
+$ curl -XGET -H 'Content-Type:application/json' http://localhost:8080/
+```
+結果
+```
+{"message":"Hello World!!"}
 ```
