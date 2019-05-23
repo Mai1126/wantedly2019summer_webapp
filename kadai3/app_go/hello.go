@@ -42,7 +42,11 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func usersHandler(w http.ResponseWriter, r *http.Request) {
-	// var id := r.URL.RawQuery
+	db, err := sql.Open("postgres", "host=postgres port=5432 user=root password=password dbname=Godb sslmode=disable")
+	defer db.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	if r.Method == "POST" {
 		if r.Header.Get("Content-Type") != "application/json" {
@@ -60,8 +64,19 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err.Error())
 			return
 		}
+		var id int
+		err = db.QueryRow("INSERT INTO users (name, email) VALUES($1,$2) RETURNING id", input.Name, input.Email).Scan(&id)
+		if err != nil {
+			fmt.Println(err)
+		}
 
-		w.WriteHeader(http.StatusOK)
+		var row string
+		err = db.QueryRow("SELECT * FROM user where id = ?", id).Scan(&row)
+		res, err := json.Marshal(row)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(201)
+		w.Write(res)
+
 	}
 
 	// if r.Method == "GET" {
@@ -74,11 +89,6 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	db, err := sql.Open("postgres", "host=127.0.0.1 port=5555 user=root password=password dbname=Godb sslmode=disable")
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-	}
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/users", usersHandler)
 	http.ListenAndServe(":8080", nil)
