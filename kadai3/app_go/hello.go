@@ -134,7 +134,7 @@ func usersidHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "DELETE" {
-		_, err := db.Exec("delete from users WHERE id = '" + id + "'")
+		_, err := db.Exec("delete from users WHERE id = $1", id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -145,7 +145,7 @@ func usersidHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		user := User{}
-		err = db.QueryRow("SELECT id, name, email, created_at, updated_at FROM users WHERE id = '"+id+"' LIMIT 1").Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+		err = db.QueryRow("SELECT id, name, email, created_at, updated_at FROM users WHERE id = $1 LIMIT 1", id).Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -179,13 +179,13 @@ func usersidHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = db.Exec("UPDATE users SET name = '" + input.Name + "', email = '" + input.Email + "' WHERE id = " + id)
+		_, err = db.Exec("UPDATE users SET name = $1, email = $2 WHERE id = $3", input.Name, input.Email, id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		user := User{}
-		err = db.QueryRow("SELECT id, name, email, created_at, updated_at FROM users WHERE id = '"+id+"' LIMIT 1").Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+		err = db.QueryRow("SELECT id, name, email, created_at, updated_at FROM users WHERE id = $1 LIMIT 1", id).Scan(&user.ID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
